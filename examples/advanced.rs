@@ -36,7 +36,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .on_click("alert('Clicked!')")
         .on_hover("this.style.opacity='0.6'");
 
-    canvas.save("advanced_demo.svg")?;
-    println!("✅ Saved advanced_demo.svg");
+    canvas.save("advanced_showcase.svg")?;
+    println!("✅ Saved advanced_showcase.svg");
     Ok(())
 }
