@@ -1,12 +1,12 @@
 [package]
 name = "svg-rs"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
-authors = ["Your Name <your.email@example.com>"]
+authors = ["Aaron Tsui"]
 description = "A lightweight Rust library for creating and manipulating SVG graphics, inspired by svg.js"
 license = "MIT"
-repository = "https://github.com/your-username/svg-rs"
-homepage = "https://github.com/your-username/svg-rs"
+repository = "https://github.com/overheat/svg-rs"
+homepage = "https://github.com/overheat/svg-rs"
 documentation = "https://docs.rs/svg-rs"
 readme = "README.md"
 keywords = ["svg", "graphics", "animation", "vector", "xml"]
