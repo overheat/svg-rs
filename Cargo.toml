@@ -23,6 +23,7 @@ exclude = [
 [features]
 default = []
 draggable = []
+shapes = []
 
 [[bin]]
 name = "svg-rs"

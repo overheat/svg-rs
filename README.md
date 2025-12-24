@@ -33,6 +33,12 @@ svg-rs = "0.1"
 
 # Enable draggable feature for interactive elements
 svg-rs = { version = "0.1", features = ["draggable"] }
+
+# Enable shapes feature for advanced geometric shapes
+svg-rs = { version = "0.1", features = ["shapes"] }
+
+# Enable multiple features
+svg-rs = { version = "0.1", features = ["draggable", "shapes"] }
 ```
 
 ### Basic Usage
@@ -61,6 +67,27 @@ fn main() {
 ```
 
 ## 📚 Examples
+
+### Advanced Shapes
+
+```rust
+// Enable shapes feature for stars and regular polygons
+let mut canvas = Svg::new(400, 300);
+
+// Create a 5-pointed star
+canvas.star(5, 30.0, 60.0)
+    .fill("#ff6b6b")
+    .stroke("#333")
+    .stroke_width(2)
+    .move_to(100, 100);
+
+// Create a hexagon (6-sided regular polygon)
+canvas.ngon(6, 40.0)
+    .fill("#4ecdc4")
+    .stroke("#333")
+    .stroke_width(2)
+    .move_to(250, 100);
+```
 
 ### Gradients and Patterns
 
@@ -151,6 +178,9 @@ canvas.rect(60, 60)
 | `image(href, w, h)` | Image | `canvas.image("pic.jpg", 100, 100)` |
 | `polygon(points)` | Polygon | `canvas.polygon("0,0 50,0 25,50")` |
 | `polyline(points)` | Polyline | `canvas.polyline("0,0 50,25 100,0")` |
+| `star(spikes, inner, outer)` | Star shape | `canvas.star(5, 30.0, 60.0)` |
+| `ngon(edges, radius)` | Regular polygon | `canvas.ngon(6, 40.0)` |
+| `cross(width, height, thickness)` | Cross shape | `canvas.cross(60.0, 80.0, 20.0)` |
 
 ### Styling Methods
 | Method | Description | Example |
@@ -209,6 +239,9 @@ Check out the [examples](examples/) directory for comprehensive usage examples:
 ```bash
 # Basic shapes and styling
 cargo run --example shapes
+
+# Advanced shapes (stars and polygons)
+cargo run --example shapes --features shapes
 
 # Advanced features demo  
 cargo run --example advanced

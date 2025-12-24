@@ -185,6 +185,51 @@ impl Svg {
         self.add_element("a", attrs)
     }
 
+    /// Create a star shape using polygon
+    #[cfg(feature = "shapes")]
+    pub fn star(&mut self, spikes: u32, inner: f64, outer: f64) -> &mut Element {
+        use crate::shapes::{star_points, points_to_string, StarConfig};
+        
+        let config = StarConfig { spikes, inner, outer };
+        let points = star_points(&config);
+        let points_str = points_to_string(&points);
+        
+        let mut attrs = HashMap::new();
+        attrs.insert("points".to_string(), points_str);
+        attrs.insert("transform".to_string(), format!("translate({}, {})", outer, outer));
+        self.add_element("polygon", attrs)
+    }
+
+    /// Create a regular polygon (ngon) shape
+    #[cfg(feature = "shapes")]
+    pub fn ngon(&mut self, edges: u32, radius: f64) -> &mut Element {
+        use crate::shapes::{ngon_points, points_to_string, NgonConfig};
+        
+        let config = NgonConfig { edges, radius };
+        let points = ngon_points(&config);
+        let points_str = points_to_string(&points);
+        
+        let mut attrs = HashMap::new();
+        attrs.insert("points".to_string(), points_str);
+        attrs.insert("transform".to_string(), format!("translate({}, {})", radius, radius));
+        self.add_element("polygon", attrs)
+    }
+
+    /// Create a cross shape
+    #[cfg(feature = "shapes")]
+    pub fn cross(&mut self, width: f64, height: f64, thickness: f64) -> &mut Element {
+        use crate::shapes::{cross_points, points_to_string, CrossConfig};
+        
+        let config = CrossConfig { width, height, thickness };
+        let points = cross_points(&config);
+        let points_str = points_to_string(&points);
+        
+        let mut attrs = HashMap::new();
+        attrs.insert("points".to_string(), points_str);
+        attrs.insert("transform".to_string(), format!("translate({}, {})", width / 2.0, height / 2.0));
+        self.add_element("polygon", attrs)
+    }
+
     fn add_element(&mut self, tag: &str, attributes: HashMap<String, String>) -> &mut Element {
         let element = Element {
             tag: tag.to_string(),
@@ -367,6 +412,51 @@ impl Element {
         let mut attrs = HashMap::new();
         attrs.insert("id".to_string(), id.to_string());
         self.add_child("symbol", attrs)
+    }
+
+    /// Create a star shape as a child element
+    #[cfg(feature = "shapes")]
+    pub fn star(&mut self, spikes: u32, inner: f64, outer: f64) -> &mut Element {
+        use crate::shapes::{star_points, points_to_string, StarConfig};
+        
+        let config = StarConfig { spikes, inner, outer };
+        let points = star_points(&config);
+        let points_str = points_to_string(&points);
+        
+        let mut attrs = HashMap::new();
+        attrs.insert("points".to_string(), points_str);
+        attrs.insert("transform".to_string(), format!("translate({}, {})", outer, outer));
+        self.add_child("polygon", attrs)
+    }
+
+    /// Create a regular polygon (ngon) as a child element
+    #[cfg(feature = "shapes")]
+    pub fn ngon(&mut self, edges: u32, radius: f64) -> &mut Element {
+        use crate::shapes::{ngon_points, points_to_string, NgonConfig};
+        
+        let config = NgonConfig { edges, radius };
+        let points = ngon_points(&config);
+        let points_str = points_to_string(&points);
+        
+        let mut attrs = HashMap::new();
+        attrs.insert("points".to_string(), points_str);
+        attrs.insert("transform".to_string(), format!("translate({}, {})", radius, radius));
+        self.add_child("polygon", attrs)
+    }
+
+    /// Create a cross shape as a child element
+    #[cfg(feature = "shapes")]
+    pub fn cross(&mut self, width: f64, height: f64, thickness: f64) -> &mut Element {
+        use crate::shapes::{cross_points, points_to_string, CrossConfig};
+        
+        let config = CrossConfig { width, height, thickness };
+        let points = cross_points(&config);
+        let points_str = points_to_string(&points);
+        
+        let mut attrs = HashMap::new();
+        attrs.insert("points".to_string(), points_str);
+        attrs.insert("transform".to_string(), format!("translate({}, {})", width / 2.0, height / 2.0));
+        self.add_child("polygon", attrs)
     }
 
     pub fn animate(&mut self, duration: u32) -> &mut Self {
