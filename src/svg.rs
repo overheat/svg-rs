@@ -51,7 +51,7 @@ impl Svg {
         self.add_element("ellipse", attrs)
     }
 
-    pub fn line(&mut self, x1: u32, y1: u32, x2: u32, y2: u32) -> &mut Element {
+    pub fn line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32) -> &mut Element {
         let mut attrs = HashMap::new();
         attrs.insert("x1".to_string(), x1.to_string());
         attrs.insert("y1".to_string(), y1.to_string());
@@ -188,7 +188,7 @@ impl Svg {
         }
         
         svg.push_str(r#" xmlns="http://www.w3.org/2000/svg">
-"#);
+    "#);
         
         for element in &self.elements {
             svg.push_str("  ");
@@ -549,19 +549,28 @@ impl Element {
         self
     }
 
+    fn append_transform(&mut self, transform: &str) -> &mut Self {
+        let next = match self.attributes.get("transform") {
+            Some(existing) if !existing.is_empty() => format!("{} {}", existing, transform),
+            _ => transform.to_string(),
+        };
+        self.attributes.insert("transform".to_string(), next);
+        self
+    }
+
     pub fn rotate(&mut self, angle: f32) -> &mut Self {
         let transform = format!("rotate({})", angle);
-        self.transform(&transform)
+        self.append_transform(&transform)
     }
 
     pub fn scale(&mut self, x: f32, y: f32) -> &mut Self {
         let transform = format!("scale({}, {})", x, y);
-        self.transform(&transform)
+        self.append_transform(&transform)
     }
 
     pub fn translate(&mut self, x: f32, y: f32) -> &mut Self {
         let transform = format!("translate({}, {})", x, y);
-        self.transform(&transform)
+        self.append_transform(&transform)
     }
 
     pub fn flip(&mut self, axis: &str) -> &mut Self {
@@ -571,22 +580,22 @@ impl Element {
             "both" => "scale(-1, -1)".to_string(),
             _ => return self,
         };
-        self.transform(&transform)
+        self.append_transform(&transform)
     }
 
     pub fn skew(&mut self, x: f32, y: f32) -> &mut Self {
         let transform = format!("skewX({}) skewY({})", x, y);
-        self.transform(&transform)
+        self.append_transform(&transform)
     }
 
     pub fn skew_x(&mut self, angle: f32) -> &mut Self {
         let transform = format!("skewX({})", angle);
-        self.transform(&transform)
+        self.append_transform(&transform)
     }
 
     pub fn skew_y(&mut self, angle: f32) -> &mut Self {
         let transform = format!("skewY({})", angle);
-        self.transform(&transform)
+        self.append_transform(&transform)
     }
 
     pub fn to_string(&self) -> String {
@@ -597,20 +606,37 @@ impl Element {
             if key == "text-content" {
                 text_content = value.clone();
             } else {
-                attrs.push_str(&format!(r#" {}="{}""#, key, value));
+                attrs.push_str(&format!(r#" {}="{}""#, key, escape_attr(value)));
             }
         }
         
-        if !self.children.is_empty() || (self.tag == "text" && !text_content.is_empty()) {
-            let mut content = text_content;
+        let has_children = !self.children.is_empty();
+        let has_text = !text_content.is_empty();
+        if has_children || has_text {
+            let mut content = escape_text(&text_content);
             for child in &self.children {
                 content.push_str(&child.to_string());
             }
             format!("<{}{}>{}</{}>", self.tag, attrs, content, self.tag)
         } else {
-            format!("<{}{}/>", self.tag, attrs)
+            format!("<{}{} />", self.tag, attrs)
         }
     }
+}
+
+fn escape_attr(value: &str) -> String {
+    value
+        .replace('&', "&amp;")
+        .replace('"', "&quot;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+}
+
+fn escape_text(value: &str) -> String {
+    value
+        .replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
 }
 
 #[cfg(test)]
