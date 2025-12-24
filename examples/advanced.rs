@@ -1,59 +1,42 @@
 use svg_rs::*;
 
-fn main() {
-    let mut canvas = Svg::new(800, 600);
-    
-    // 创建渐变定义
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let mut canvas = Svg::new(640, 360);
+
+    // 背景渐变
     let defs = canvas.defs();
-    let gradient = defs.linear_gradient("myGradient");
-    gradient.stop("0%", "#ff0000");
-    gradient.stop("100%", "#0000ff");
-    
-    // 使用渐变的矩形
-    canvas.rect(200, 100)
-        .fill("url(#myGradient)")
-        .move_to(50, 50);
-    
-    // 分组元素
-    let group = canvas.group()
-        .transform("translate(300, 100)");
-    
-    group.circle(30)
-        .fill("#00ff00")
-        .center(0, 0);
-    
-    group.rect(40, 40)
-        .fill("#ff00ff")
-        .move_to(-20, 40);
-    
-    // 带动画的圆形
-    let animated_circle = canvas.circle(25)
-        .fill("#ffff00")
-        .center(400, 300);
-    
-    animated_circle.animate_attr("r", "25", "50", 2);
-    animated_circle.animate_attr("fill", "#ffff00", "#ff0000", 3);
-    
-    // 交互元素
-    canvas.rect(100, 50)
-        .fill("#00ffff")
-        .move_to(500, 200)
-        .on_click("alert('Clicked!')")
-        .on_hover("this.style.opacity='0.5'");
-    
-    // 多边形
-    canvas.polygon("100,10 40,198 190,78 10,78 160,198")
-        .fill("#ffa500")
-        .transform("translate(200, 400) scale(0.5)");
-    
-    // 折线
-    canvas.polyline("20,20 40,25 60,40 80,120 120,140 200,180")
+    let gradient = defs.linear_gradient("sunset");
+    gradient.stop("0%", "#ff9a9e");
+    gradient.stop("100%", "#fad0c4");
+    canvas.rect(640, 360).fill("url(#sunset)");
+
+    // 分组 + 变换
+    let group = canvas.group().transform("translate(80, 60)");
+    group.rect(200, 120).fill("#ffffff").stroke("#222222").stroke_width(2);
+    group.circle(30).fill("#2d9cdb").center(60, 60);
+    group.circle(30).fill("#27ae60").center(140, 60);
+
+    // 路径示例
+    canvas
+        .path("M 360 220 Q 400 160 440 220 T 520 220")
         .fill("none")
-        .stroke("#000000")
-        .stroke_width(3)
-        .transform("translate(400, 400)");
-    
-    println!("{}", canvas.to_string());
-    canvas.save("advanced_demo.svg").expect("Failed to save");
-    println!("✅ Advanced demo saved to advanced_demo.svg");
+        .stroke("#073b4c")
+        .stroke_width(3);
+
+    // 动画圆
+    let animated = canvas.circle(20).fill("#ffd166").center(420, 140);
+    animated.animate_attr("cx", "420", "520", 2);
+    animated.animate_attr("r", "20", "32", 2);
+
+    // 交互按钮
+    canvas
+        .rect(120, 50)
+        .fill("#ef476f")
+        .move_to(420, 240)
+        .on_click("alert('Clicked!')")
+        .on_hover("this.style.opacity='0.6'");
+
+    canvas.save("advanced_demo.svg")?;
+    println!("✅ Saved advanced_demo.svg");
+    Ok(())
 }

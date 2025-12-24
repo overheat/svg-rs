@@ -75,7 +75,9 @@ svg-rs/
 │   ├── svg.rs          # 核心实现
 │   └── main.rs         # 示例程序
 ├── examples/
-│   └── demo.rs         # 完整示例
+│   ├── quickstart.rs   # 快速上手示例
+│   ├── advanced.rs     # 进阶特性示例
+│   └── feature_tests.rs # 手动特性测试
 ├── Cargo.toml          # 项目配置
 └── README.md           # 文档
 ```
@@ -96,14 +98,7 @@ cargo test
 
 ## 🎨 生成的 SVG 示例
 
-运行 `cargo run --example demo` 会生成一个包含多种元素的 SVG 文件：
-
-- 彩色矩形组
-- 不同颜色的圆形
-- 椭圆形状
-- 线条和路径
-- 文本元素
-- 变换效果
+运行 `cargo run --example quickstart` 会生成一个包含文本、圆形、矩形描边和基准线的简单 SVG；`cargo run --example advanced` 演示渐变、分组变换、路径、动画和交互按钮。
 
 ## 🔄 与 svg.js 的对比
 
