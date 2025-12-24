@@ -20,6 +20,10 @@ exclude = [
 
 [dependencies]
 
+[features]
+default = []
+draggable = []
+
 [[bin]]
 name = "svg-rs"
 path = "src/main.rs"

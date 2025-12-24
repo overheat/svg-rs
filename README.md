@@ -18,6 +18,7 @@ A lightweight Rust library for creating and manipulating SVG graphics, inspired 
 - 📝 **Text processing**: advanced text handling with tspan and textPath
 - 🔄 **Transformations**: rotate, scale, translate, skew, flip
 - 🎨 **CSS integration**: class management and inline styles
+- 🖱️ **Draggable elements**: interactive drag functionality (optional feature)
 - 🚀 **Zero dependencies**: pure Rust implementation
 - 🛡️ **Type safety**: leverages Rust's type system for correctness
 - 📦 **Lightweight**: minimal footprint with maximum functionality
@@ -29,6 +30,9 @@ Add this to your `Cargo.toml`:
 ```toml
 [dependencies]
 svg-rs = "0.1"
+
+# Enable draggable feature for interactive elements
+svg-rs = { version = "0.1", features = ["draggable"] }
 ```
 
 ### Basic Usage
@@ -109,12 +113,28 @@ group.rect(40, 40).fill("#blue").move_to(-20, 40);
 ### Interactive Elements
 
 ```rust
+// Enable dragging (requires "draggable" feature)
 canvas.rect(120, 40)
     .fill("#2ecc71")
     .move_to(50, 200)
-    .class("interactive")
-    .on_click("this.style.fill='#27ae60'")
-    .on_hover("this.style.opacity='0.8'");
+    .id("my-rect")
+    .draggable();
+
+// Draggable with constraints
+canvas.circle(30)
+    .fill("#e74c3c")
+    .center(200, 200)
+    .id("constrained-circle")
+    .draggable()
+    .drag_constrain(100.0, 100.0, 300.0, 200.0);
+
+// Draggable with grid snapping
+canvas.rect(60, 60)
+    .fill("#3498db")
+    .move_to(300, 100)
+    .id("grid-rect")
+    .draggable()
+    .drag_snap_grid(25.0);
 ```
 
 ## 📖 API Reference
@@ -157,6 +177,9 @@ canvas.rect(120, 40)
 | Method | Description | Example |
 |--------|-------------|---------|
 | `animate_attr(attr, from, to, dur)` | Animation | `.animate_attr("r", "10", "50", 2)` |
+| `draggable()` | Enable dragging | `.draggable()` |
+| `drag_constrain(x, y, w, h)` | Drag constraints | `.drag_constrain(0, 0, 100, 100)` |
+| `drag_snap_grid(size)` | Grid snapping | `.drag_snap_grid(25.0)` |
 | `mask(id)` | Apply mask | `.mask("myMask")` |
 | `clip_path(id)` | Apply clipping | `.clip_path("myClip")` |
 | `marker_start/mid/end(id)` | Path markers | `.marker_end("arrow")` |
@@ -196,8 +219,11 @@ cargo run --example gradients
 # Animations
 cargo run --example animations
 
+# Interactive draggable elements
+cargo run --example draggable --features draggable
+
 # Interactive elements
-cargo run --example events
+cargo run --example events --features draggable
 ```
 
 ## 🛠️ Development

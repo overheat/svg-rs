@@ -1,5 +1,8 @@
 use std::collections::HashMap;
 
+#[cfg(feature = "draggable")]
+use crate::draggable::DragHandler;
+
 /// The main SVG canvas that holds all elements and provides methods to create new ones.
 ///
 /// # Examples
@@ -24,6 +27,8 @@ pub struct Element {
     tag: String,
     attributes: HashMap<String, String>,
     children: Vec<Element>,
+    #[cfg(feature = "draggable")]
+    drag_handler: DragHandler,
 }
 
 /// A group container for organizing related elements (currently unused).
@@ -185,6 +190,8 @@ impl Svg {
             tag: tag.to_string(),
             attributes,
             children: Vec::new(),
+            #[cfg(feature = "draggable")]
+            drag_handler: DragHandler::default(),
         };
         
         self.elements.push(element);
@@ -210,8 +217,30 @@ impl Svg {
             svg.push('\n');
         }
         
+        // Add drag scripts for draggable elements
+        #[cfg(feature = "draggable")]
+        {
+            let mut scripts = String::new();
+            self.collect_drag_scripts(&self.elements, &mut scripts);
+            if !scripts.is_empty() {
+                svg.push_str(&scripts);
+            }
+        }
+        
         svg.push_str("</svg>");
         svg
+    }
+
+    /// Collect drag scripts from all elements recursively
+    #[cfg(feature = "draggable")]
+    fn collect_drag_scripts(&self, elements: &[Element], scripts: &mut String) {
+        for element in elements {
+            let script = element.get_drag_script();
+            if !script.is_empty() {
+                scripts.push_str(&script);
+            }
+            self.collect_drag_scripts(&element.children, scripts);
+        }
     }
 
     pub fn save(&self, filename: &str) -> std::io::Result<()> {
@@ -230,6 +259,8 @@ impl Element {
             tag: tag.to_string(),
             attributes,
             children: Vec::new(),
+            #[cfg(feature = "draggable")]
+            drag_handler: DragHandler::default(),
         };
         self.children.push(element);
         self.children.last_mut().unwrap()
@@ -345,6 +376,8 @@ impl Element {
             tag: "animate".to_string(),
             attributes: attrs,
             children: Vec::new(),
+            #[cfg(feature = "draggable")]
+            drag_handler: DragHandler::default(),
         };
         self.children.push(animate_elem);
         self
@@ -362,6 +395,8 @@ impl Element {
             tag: "animate".to_string(),
             attributes: attrs,
             children: Vec::new(),
+            #[cfg(feature = "draggable")]
+            drag_handler: DragHandler::default(),
         };
         self.children.push(animate_elem);
         self
@@ -636,6 +671,44 @@ impl Element {
             format!("<{}{} />", self.tag, attrs)
         }
     }
+
+    /// Enable draggable functionality for this element
+    #[cfg(feature = "draggable")]
+    pub fn draggable(&mut self) -> &mut Self {
+        self.drag_handler.enable();
+        self
+    }
+
+    /// Disable draggable functionality for this element
+    #[cfg(feature = "draggable")]
+    pub fn draggable_disable(&mut self) -> &mut Self {
+        self.drag_handler.disable();
+        self
+    }
+
+    /// Set drag constraints (x, y, width, height)
+    #[cfg(feature = "draggable")]
+    pub fn drag_constrain(&mut self, x: f32, y: f32, width: f32, height: f32) -> &mut Self {
+        self.drag_handler.constrain(x, y, width, height);
+        self
+    }
+
+    /// Enable grid snapping for dragging
+    #[cfg(feature = "draggable")]
+    pub fn drag_snap_grid(&mut self, size: f32) -> &mut Self {
+        self.drag_handler.snap_to_grid(size);
+        self
+    }
+
+    /// Get the drag script for this element (internal use)
+    #[cfg(feature = "draggable")]
+    pub fn get_drag_script(&self) -> String {
+        if let Some(id) = self.attributes.get("id") {
+            self.drag_handler.generate_script(id)
+        } else {
+            String::new()
+        }
+    }
 }
 
 fn escape_attr(value: &str) -> String {
@@ -850,5 +923,23 @@ mod tests {
         
         let output = svg.to_string();
         assert!(output.contains("viewBox=\"0 0 400 300\""));
+    }
+
+    #[cfg(feature = "draggable")]
+    #[test]
+    fn test_draggable() {
+        let mut svg = Svg::new(200, 200);
+        svg.rect(50, 50)
+            .id("test-rect")
+            .draggable()
+            .drag_constrain(0.0, 0.0, 100.0, 100.0)
+            .drag_snap_grid(10.0);
+        
+        let output = svg.to_string();
+        assert!(output.contains("id=\"test-rect\""));
+        assert!(output.contains("<script>"));
+        assert!(output.contains("getElementById('test-rect')"));
+        assert!(output.contains("Math.max(0, Math.min(100"));
+        assert!(output.contains("Math.round(newX / 10) * 10"));
     }
 }

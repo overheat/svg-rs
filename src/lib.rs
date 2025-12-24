@@ -37,4 +37,10 @@
 
 pub mod svg;
 
+#[cfg(feature = "draggable")]
+pub mod draggable;
+
 pub use svg::*;
+
+#[cfg(feature = "draggable")]
+pub use draggable::*;
