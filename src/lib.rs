@@ -46,6 +46,9 @@ pub mod shapes;
 #[cfg(feature = "math")]
 pub mod math;
 
+#[cfg(feature = "path")]
+pub mod path;
+
 pub use svg::*;
 
 #[cfg(feature = "draggable")]
@@ -56,3 +59,6 @@ pub use shapes::*;
 
 #[cfg(feature = "math")]
 pub use math::*;
+
+#[cfg(feature = "path")]
+pub use path::*;

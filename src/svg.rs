@@ -29,6 +29,10 @@ pub struct Element {
     children: Vec<Element>,
     #[cfg(feature = "draggable")]
     drag_handler: DragHandler,
+    #[cfg(feature = "path")]
+    pub(crate) path_segments: Option<Vec<crate::path::PathSegment>>,
+    #[cfg(feature = "path")]
+    pub(crate) auto_redraw: bool,
 }
 
 /// A group container for organizing related elements (currently unused).
@@ -237,6 +241,10 @@ impl Svg {
             children: Vec::new(),
             #[cfg(feature = "draggable")]
             drag_handler: DragHandler::default(),
+            #[cfg(feature = "path")]
+            path_segments: None,
+            #[cfg(feature = "path")]
+            auto_redraw: true,
         };
         
         self.elements.push(element);
@@ -306,6 +314,10 @@ impl Element {
             children: Vec::new(),
             #[cfg(feature = "draggable")]
             drag_handler: DragHandler::default(),
+            #[cfg(feature = "path")]
+            path_segments: None,
+            #[cfg(feature = "path")]
+            auto_redraw: true,
         };
         self.children.push(element);
         self.children.last_mut().unwrap()
@@ -468,6 +480,10 @@ impl Element {
             children: Vec::new(),
             #[cfg(feature = "draggable")]
             drag_handler: DragHandler::default(),
+            #[cfg(feature = "path")]
+            path_segments: None,
+            #[cfg(feature = "path")]
+            auto_redraw: true,
         };
         self.children.push(animate_elem);
         self
@@ -487,6 +503,10 @@ impl Element {
             children: Vec::new(),
             #[cfg(feature = "draggable")]
             drag_handler: DragHandler::default(),
+            #[cfg(feature = "path")]
+            path_segments: None,
+            #[cfg(feature = "path")]
+            auto_redraw: true,
         };
         self.children.push(animate_elem);
         self

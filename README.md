@@ -20,6 +20,7 @@ A lightweight Rust library for creating and manipulating SVG graphics, inspired 
 - 🎨 **CSS integration**: class management and inline styles
 - 🖱️ **Draggable elements**: interactive drag functionality (optional feature)
 - 🧮 **Mathematical utilities**: geometric calculations, angles, lines, points (optional feature)
+- 🛤️ **Advanced path operations**: SVG path building with all commands (optional feature)
 - 🚀 **Zero dependencies**: pure Rust implementation
 - 🛡️ **Type safety**: leverages Rust's type system for correctness
 - 📦 **Lightweight**: minimal footprint with maximum functionality
@@ -41,8 +42,11 @@ svg-rs = { version = "0.1", features = ["shapes"] }
 # Enable math feature for mathematical utilities
 svg-rs = { version = "0.1", features = ["math"] }
 
+# Enable path feature for advanced path operations
+svg-rs = { version = "0.1", features = ["path"] }
+
 # Enable multiple features
-svg-rs = { version = "0.1", features = ["draggable", "shapes", "math"] }
+svg-rs = { version = "0.1", features = ["draggable", "shapes", "math", "path"] }
 ```
 
 ### Basic Usage
@@ -168,6 +172,29 @@ let halfway_point = line.interpolated_point(0.5);
 let distance = p1.distance_to(&p2);
 ```
 
+### Advanced Path Operations
+
+```rust
+// Enable path feature for advanced path building
+use svg_rs::path::PathBuilder;
+
+let path = canvas.path("")
+    .M(50.0, 50.0)           // Move to absolute position
+    .L(150.0, 50.0)          // Line to absolute position
+    .C(150.0, 25.0, 175.0, 25.0, 175.0, 50.0)  // Cubic Bezier curve
+    .Q(200.0, 25.0, 225.0, 50.0)  // Quadratic Bezier curve
+    .A(25.0, 25.0, 0.0, 0, 1, 275.0, 50.0)  // Arc
+    .Z();                    // Close path
+
+// Path manipulation
+path.remove_segment(2);      // Remove a segment
+path.clear_path();           // Clear all segments
+path.redraw();               // Manually redraw path
+
+// Animated path drawing
+path.draw_animated(3000, 0, "ease-in-out");
+```
+
 ```rust
 // Enable dragging (requires "draggable" feature)
 canvas.rect(120, 40)
@@ -225,6 +252,34 @@ canvas.rect(60, 60)
 | `Line::midpoint()` | Line midpoint | `line.midpoint()` |
 | `Line::perpendicular_line(p, dist)` | Perpendicular line | `line.perpendicular_line(&p, 50.0)` |
 | `Line::interpolated_point(t)` | Point at parameter t | `line.interpolated_point(0.5)` |
+
+### Path Operations (with `path` feature)
+| Method | Description | Example |
+|--------|-------------|---------|
+| `M(x, y)` | Move to absolute | `.M(50.0, 50.0)` |
+| `m(dx, dy)` | Move to relative | `.m(10.0, 10.0)` |
+| `L(x, y)` | Line to absolute | `.L(100.0, 100.0)` |
+| `l(dx, dy)` | Line to relative | `.l(50.0, 0.0)` |
+| `H(x)` | Horizontal line absolute | `.H(150.0)` |
+| `h(dx)` | Horizontal line relative | `.h(50.0)` |
+| `V(y)` | Vertical line absolute | `.V(100.0)` |
+| `v(dy)` | Vertical line relative | `.v(50.0)` |
+| `C(c1x, c1y, c2x, c2y, x, y)` | Cubic Bezier absolute | `.C(50.0, 25.0, 75.0, 25.0, 100.0, 50.0)` |
+| `c(dc1x, dc1y, dc2x, dc2y, dx, dy)` | Cubic Bezier relative | `.c(25.0, -25.0, 50.0, -25.0, 75.0, 0.0)` |
+| `S(c2x, c2y, x, y)` | Smooth cubic Bezier | `.S(125.0, 75.0, 150.0, 50.0)` |
+| `s(dc2x, dc2y, dx, dy)` | Smooth cubic relative | `.s(25.0, 25.0, 50.0, 0.0)` |
+| `Q(cx, cy, x, y)` | Quadratic Bezier | `.Q(75.0, 25.0, 100.0, 50.0)` |
+| `q(dcx, dcy, dx, dy)` | Quadratic relative | `.q(25.0, -25.0, 50.0, 0.0)` |
+| `T(x, y)` | Smooth quadratic | `.T(150.0, 50.0)` |
+| `t(dx, dy)` | Smooth quadratic relative | `.t(50.0, 0.0)` |
+| `A(rx, ry, rot, large, sweep, x, y)` | Arc absolute | `.A(25.0, 25.0, 0.0, 0, 1, 100.0, 50.0)` |
+| `a(rx, ry, rot, large, sweep, dx, dy)` | Arc relative | `.a(25.0, 25.0, 0.0, 0, 1, 50.0, 0.0)` |
+| `Z()` | Close path | `.Z()` |
+| `clear_path()` | Clear all segments | `.clear_path()` |
+| `get_segment_count()` | Get segment count | `.get_segment_count()` |
+| `remove_segment(index)` | Remove segment | `.remove_segment(1)` |
+| `redraw()` | Redraw path | `.redraw()` |
+| `draw_animated(dur, delay, ease)` | Animate drawing | `.draw_animated(2000, 0, "ease")` |
 
 ### Styling Methods
 | Method | Description | Example |
@@ -298,6 +353,9 @@ cargo run --example animations
 
 # Mathematical utilities
 cargo run --example math --features math
+
+# Advanced path operations
+cargo run --example path --features path
 
 # Interactive draggable elements
 cargo run --example draggable --features draggable

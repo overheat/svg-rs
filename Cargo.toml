@@ -25,6 +25,7 @@ default = []
 draggable = []
 shapes = []
 math = []
+path = []
 
 [[bin]]
 name = "svg-rs"
