@@ -3,6 +3,7 @@ use std::collections::HashMap;
 pub struct Svg {
     width: u32,
     height: u32,
+    viewbox: Option<(f32, f32, f32, f32)>,
     elements: Vec<Element>,
 }
 
@@ -22,6 +23,7 @@ impl Svg {
         Self {
             width,
             height,
+            viewbox: None,
             elements: Vec::new(),
         }
     }
@@ -111,6 +113,59 @@ impl Svg {
         self.add_element("style", attrs)
     }
 
+    pub fn image(&mut self, href: &str, width: u32, height: u32) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("href".to_string(), href.to_string());
+        attrs.insert("width".to_string(), width.to_string());
+        attrs.insert("height".to_string(), height.to_string());
+        self.add_element("image", attrs)
+    }
+
+    pub fn use_element(&mut self, href: &str) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("href".to_string(), format!("#{}", href));
+        self.add_element("use", attrs)
+    }
+
+    pub fn marker(&mut self, id: &str, width: u32, height: u32) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("id".to_string(), id.to_string());
+        attrs.insert("markerWidth".to_string(), width.to_string());
+        attrs.insert("markerHeight".to_string(), height.to_string());
+        attrs.insert("refX".to_string(), "0".to_string());
+        attrs.insert("refY".to_string(), "0".to_string());
+        attrs.insert("orient".to_string(), "auto".to_string());
+        self.add_element("marker", attrs)
+    }
+
+    pub fn pattern(&mut self, id: &str, width: u32, height: u32) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("id".to_string(), id.to_string());
+        attrs.insert("width".to_string(), width.to_string());
+        attrs.insert("height".to_string(), height.to_string());
+        attrs.insert("patternUnits".to_string(), "userSpaceOnUse".to_string());
+        self.add_element("pattern", attrs)
+    }
+
+    pub fn symbol(&mut self, id: &str) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("id".to_string(), id.to_string());
+        self.add_element("symbol", attrs)
+    }
+
+    pub fn foreign_object(&mut self, width: u32, height: u32) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("width".to_string(), width.to_string());
+        attrs.insert("height".to_string(), height.to_string());
+        self.add_element("foreignObject", attrs)
+    }
+
+    pub fn link(&mut self, href: &str) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("href".to_string(), href.to_string());
+        self.add_element("a", attrs)
+    }
+
     fn add_element(&mut self, tag: &str, attributes: HashMap<String, String>) -> &mut Element {
         let element = Element {
             tag: tag.to_string(),
@@ -124,10 +179,16 @@ impl Svg {
 
     pub fn to_string(&self) -> String {
         let mut svg = format!(
-            r#"<svg width="{}" height="{}" xmlns="http://www.w3.org/2000/svg">
-"#,
+            r#"<svg width="{}" height="{}""#,
             self.width, self.height
         );
+        
+        if let Some((x, y, w, h)) = self.viewbox {
+            svg.push_str(&format!(r#" viewBox="{} {} {} {}""#, x, y, w, h));
+        }
+        
+        svg.push_str(r#" xmlns="http://www.w3.org/2000/svg">
+"#);
         
         for element in &self.elements {
             svg.push_str("  ");
@@ -141,6 +202,11 @@ impl Svg {
 
     pub fn save(&self, filename: &str) -> std::io::Result<()> {
         std::fs::write(filename, self.to_string())
+    }
+
+    pub fn viewbox(&mut self, x: f32, y: f32, width: f32, height: f32) -> &mut Self {
+        self.viewbox = Some((x, y, width, height));
+        self
     }
 }
 
@@ -225,6 +291,39 @@ impl Element {
         self.add_child("g", HashMap::new())
     }
 
+    pub fn tspan(&mut self, content: &str) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("text-content".to_string(), content.to_string());
+        self.add_child("tspan", attrs)
+    }
+
+    pub fn text_path(&mut self, path_id: &str, content: &str) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("href".to_string(), format!("#{}", path_id));
+        attrs.insert("text-content".to_string(), content.to_string());
+        self.add_child("textPath", attrs)
+    }
+
+    pub fn image(&mut self, href: &str, width: u32, height: u32) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("href".to_string(), href.to_string());
+        attrs.insert("width".to_string(), width.to_string());
+        attrs.insert("height".to_string(), height.to_string());
+        self.add_child("image", attrs)
+    }
+
+    pub fn use_element(&mut self, href: &str) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("href".to_string(), format!("#{}", href));
+        self.add_child("use", attrs)
+    }
+
+    pub fn symbol(&mut self, id: &str) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("id".to_string(), id.to_string());
+        self.add_child("symbol", attrs)
+    }
+
     pub fn animate(&mut self, duration: u32) -> &mut Self {
         let mut attrs = HashMap::new();
         attrs.insert("dur".to_string(), format!("{}s", duration));
@@ -299,6 +398,114 @@ impl Element {
         self.attributes.insert("id".to_string(), id.to_string());
         self
     }
+
+    pub fn font_family(&mut self, family: &str) -> &mut Self {
+        self.attributes.insert("font-family".to_string(), family.to_string());
+        self
+    }
+
+    pub fn font_size(&mut self, size: u32) -> &mut Self {
+        self.attributes.insert("font-size".to_string(), size.to_string());
+        self
+    }
+
+    pub fn font_weight(&mut self, weight: &str) -> &mut Self {
+        self.attributes.insert("font-weight".to_string(), weight.to_string());
+        self
+    }
+
+    pub fn font_style(&mut self, style: &str) -> &mut Self {
+        self.attributes.insert("font-style".to_string(), style.to_string());
+        self
+    }
+
+    pub fn text_anchor(&mut self, anchor: &str) -> &mut Self {
+        self.attributes.insert("text-anchor".to_string(), anchor.to_string());
+        self
+    }
+
+    pub fn dx(&mut self, value: f32) -> &mut Self {
+        self.attributes.insert("dx".to_string(), value.to_string());
+        self
+    }
+
+    pub fn dy(&mut self, value: f32) -> &mut Self {
+        self.attributes.insert("dy".to_string(), value.to_string());
+        self
+    }
+
+    pub fn marker_start(&mut self, marker_id: &str) -> &mut Self {
+        self.attributes.insert("marker-start".to_string(), format!("url(#{})", marker_id));
+        self
+    }
+
+    pub fn marker_mid(&mut self, marker_id: &str) -> &mut Self {
+        self.attributes.insert("marker-mid".to_string(), format!("url(#{})", marker_id));
+        self
+    }
+
+    pub fn marker_end(&mut self, marker_id: &str) -> &mut Self {
+        self.attributes.insert("marker-end".to_string(), format!("url(#{})", marker_id));
+        self
+    }
+
+    pub fn attr(&self, name: &str) -> Option<&String> {
+        self.attributes.get(name)
+    }
+
+    pub fn set_attr(&mut self, name: &str, value: &str) -> &mut Self {
+        self.attributes.insert(name.to_string(), value.to_string());
+        self
+    }
+
+    pub fn remove_class(&mut self, class_name: &str) -> &mut Self {
+        if let Some(current) = self.attributes.get("class") {
+            let classes: Vec<&str> = current.split_whitespace()
+                .filter(|&c| c != class_name)
+                .collect();
+            if classes.is_empty() {
+                self.attributes.remove("class");
+            } else {
+                self.attributes.insert("class".to_string(), classes.join(" "));
+            }
+        }
+        self
+    }
+
+    pub fn toggle_class(&mut self, class_name: &str) -> &mut Self {
+        if self.has_class(class_name) {
+            self.remove_class(class_name)
+        } else {
+            self.add_class(class_name)
+        }
+    }
+
+    pub fn has_class(&self, class_name: &str) -> bool {
+        self.attributes.get("class")
+            .map(|classes| classes.split_whitespace().any(|c| c == class_name))
+            .unwrap_or(false)
+    }
+
+    pub fn hide(&mut self) -> &mut Self {
+        self.style("display: none")
+    }
+
+    pub fn show(&mut self) -> &mut Self {
+        let current_style = self.attributes.get("style").cloned().unwrap_or_default();
+        let new_style = current_style.replace("display: none", "").trim().to_string();
+        if new_style.is_empty() {
+            self.attributes.remove("style");
+        } else {
+            self.attributes.insert("style".to_string(), new_style);
+        }
+        self
+    }
+
+    pub fn visible(&self) -> bool {
+        !self.attributes.get("style")
+            .map(|s| s.contains("display: none"))
+            .unwrap_or(false)
+    }
     pub fn fill(&mut self, color: &str) -> &mut Self {
         self.attributes.insert("fill".to_string(), color.to_string());
         self
@@ -354,6 +561,31 @@ impl Element {
 
     pub fn translate(&mut self, x: f32, y: f32) -> &mut Self {
         let transform = format!("translate({}, {})", x, y);
+        self.transform(&transform)
+    }
+
+    pub fn flip(&mut self, axis: &str) -> &mut Self {
+        let transform = match axis {
+            "x" => "scale(-1, 1)".to_string(),
+            "y" => "scale(1, -1)".to_string(),
+            "both" => "scale(-1, -1)".to_string(),
+            _ => return self,
+        };
+        self.transform(&transform)
+    }
+
+    pub fn skew(&mut self, x: f32, y: f32) -> &mut Self {
+        let transform = format!("skewX({}) skewY({})", x, y);
+        self.transform(&transform)
+    }
+
+    pub fn skew_x(&mut self, angle: f32) -> &mut Self {
+        let transform = format!("skewX({})", angle);
+        self.transform(&transform)
+    }
+
+    pub fn skew_y(&mut self, angle: f32) -> &mut Self {
+        let transform = format!("skewY({})", angle);
         self.transform(&transform)
     }
 
@@ -514,5 +746,69 @@ mod tests {
         assert!(output.contains("polyline"));
         assert!(output.contains("polygon"));
         assert!(output.contains("points="));
+    }
+
+    #[test]
+    fn test_missing_elements() {
+        let mut svg = Svg::new(200, 200);
+        svg.image("test.jpg", 100, 100).move_to(0, 0);
+        svg.use_element("test").move_to(50, 50);
+        svg.symbol("test-symbol");
+        
+        let output = svg.to_string();
+        assert!(output.contains("image"));
+        assert!(output.contains("use"));
+        assert!(output.contains("symbol"));
+    }
+
+    #[test]
+    fn test_text_features() {
+        let mut svg = Svg::new(200, 200);
+        let text = svg.text("").font_family("Arial").font_size(16);
+        text.tspan("Hello").fill("#red");
+        text.tspan(" World").fill("#blue");
+        
+        let output = svg.to_string();
+        assert!(output.contains("font-family=\"Arial\""));
+        assert!(output.contains("font-size=\"16\""));
+        assert!(output.contains("tspan"));
+    }
+
+    #[test]
+    fn test_advanced_transforms() {
+        let mut svg = Svg::new(200, 200);
+        svg.rect(50, 50)
+            .flip("x")
+            .skew(10.0, 5.0)
+            .move_to(10, 10);
+        
+        let output = svg.to_string();
+        assert!(output.contains("transform="));
+        assert!(output.contains("scale(-1, 1)") || output.contains("skew"));
+    }
+
+    #[test]
+    fn test_css_management() {
+        let mut svg = Svg::new(200, 200);
+        let rect = svg.rect(50, 50)
+            .class("primary")
+            .add_class("highlight")
+            .move_to(10, 10);
+        
+        assert!(rect.has_class("primary"));
+        assert!(rect.has_class("highlight"));
+        
+        rect.remove_class("primary");
+        assert!(!rect.has_class("primary"));
+        assert!(rect.has_class("highlight"));
+    }
+
+    #[test]
+    fn test_viewbox() {
+        let mut svg = Svg::new(800, 600);
+        svg.viewbox(0.0, 0.0, 400.0, 300.0);
+        
+        let output = svg.to_string();
+        assert!(output.contains("viewBox=\"0 0 400 300\""));
     }
 }
