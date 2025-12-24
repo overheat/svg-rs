@@ -2,5 +2,18 @@
 name = "svg-rs"
 version = "0.1.0"
 edition = "2024"
+description = "The lightweight library for manipulating and animating SVG in rust"
+license = "MIT"
+repository = "https://github.com/your-username/svg-rs"
+keywords = ["svg", "graphics", "animation"]
+categories = ["graphics", "multimedia"]
 
 [dependencies]
+
+[[bin]]
+name = "svg-rs"
+path = "src/main.rs"
+
+[lib]
+name = "svg_rs"
+path = "src/lib.rs"

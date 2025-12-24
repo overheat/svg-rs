@@ -1,0 +1,16 @@
+<svg width="600" height="400" xmlns="http://www.w3.org/2000/svg">
+  <rect width="600" x="0" fill="#f8f9fa" height="400" y="0"/>
+  <text y="30" x="250" fill="#212529">SVG-RS Demo</text>
+  <rect width="80" fill="#e74c3c" x="50" height="60" y="60"/>
+  <rect fill="#3498db" height="60" width="80" x="150" y="60"/>
+  <rect fill="#2ecc71" y="60" height="60" x="250" width="80"/>
+  <circle fill="#f39c12" cx="90" cy="180" r="30"/>
+  <circle cy="180" fill="#9b59b6" r="30" cx="190"/>
+  <circle cy="180" fill="#1abc9c" cx="290" r="30"/>
+  <ellipse cy="100" fill="#e67e22" ry="30" cx="450" rx="60"/>
+  <line y1="250" stroke-width="2" x1="50" y2="250" stroke="#34495e" x2="350"/>
+  <path stroke-width="3" stroke="#e74c3c" fill="none" d="M 50 280 Q 100 260 150 280 T 250 280 T 350 280"/>
+  <rect fill="#f1c40f" width="40" x="450" transform="rotate(45)" height="40" y="200"/>
+  <circle cx="500" fill="none" stroke="#2c3e50" r="25" cy="300" stroke-width="3"/>
+  <rect fill="#8e44ad" width="100" height="50" x="400" y="320"/>
+</svg>

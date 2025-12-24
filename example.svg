@@ -1,0 +1,9 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <rect x="50" width="100" y="50" fill="#f06" height="100"/>
+  <circle fill="#0f6" r="50" cy="100" cx="200"/>
+  <ellipse ry="40" fill="#06f" cx="350" cy="100" rx="80"/>
+  <line x2="200" stroke="#000" x1="50" y2="250" y1="200" stroke-width="3"/>
+  <path stroke-width="2" fill="none" stroke="#f60" d="M 250 200 Q 300 150 350 200 T 450 200"/>
+  <text x="50" fill="#333" y="300">Hello SVG-RS!</text>
+  <rect width="60" x="400" fill="#f0f" y="250" height="60" transform="rotate(45)"/>
+</svg>
