@@ -93,6 +93,24 @@ impl Svg {
         self.add_element("defs", HashMap::new())
     }
 
+    pub fn mask(&mut self, id: &str) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("id".to_string(), id.to_string());
+        self.add_element("mask", attrs)
+    }
+
+    pub fn clip_path(&mut self, id: &str) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("id".to_string(), id.to_string());
+        self.add_element("clipPath", attrs)
+    }
+
+    pub fn style_element(&mut self, css: &str) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("text-content".to_string(), css.to_string());
+        self.add_element("style", attrs)
+    }
+
     fn add_element(&mut self, tag: &str, attributes: HashMap<String, String>) -> &mut Element {
         let element = Element {
             tag: tag.to_string(),
@@ -163,6 +181,50 @@ impl Element {
         self.add_child("stop", attrs)
     }
 
+    pub fn ellipse(&mut self, rx: u32, ry: u32) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("rx".to_string(), rx.to_string());
+        attrs.insert("ry".to_string(), ry.to_string());
+        self.add_child("ellipse", attrs)
+    }
+
+    pub fn line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("x1".to_string(), x1.to_string());
+        attrs.insert("y1".to_string(), y1.to_string());
+        attrs.insert("x2".to_string(), x2.to_string());
+        attrs.insert("y2".to_string(), y2.to_string());
+        self.add_child("line", attrs)
+    }
+
+    pub fn path(&mut self, d: &str) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("d".to_string(), d.to_string());
+        self.add_child("path", attrs)
+    }
+
+    pub fn polygon(&mut self, points: &str) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("points".to_string(), points.to_string());
+        self.add_child("polygon", attrs)
+    }
+
+    pub fn polyline(&mut self, points: &str) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("points".to_string(), points.to_string());
+        self.add_child("polyline", attrs)
+    }
+
+    pub fn text(&mut self, content: &str) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("text-content".to_string(), content.to_string());
+        self.add_child("text", attrs)
+    }
+
+    pub fn group(&mut self) -> &mut Element {
+        self.add_child("g", HashMap::new())
+    }
+
     pub fn animate(&mut self, duration: u32) -> &mut Self {
         let mut attrs = HashMap::new();
         attrs.insert("dur".to_string(), format!("{}s", duration));
@@ -199,6 +261,42 @@ impl Element {
 
     pub fn on_hover(&mut self, handler: &str) -> &mut Self {
         self.attributes.insert("onmouseover".to_string(), handler.to_string());
+        self
+    }
+
+    pub fn class(&mut self, class_name: &str) -> &mut Self {
+        self.attributes.insert("class".to_string(), class_name.to_string());
+        self
+    }
+
+    pub fn add_class(&mut self, class_name: &str) -> &mut Self {
+        let current = self.attributes.get("class").cloned().unwrap_or_default();
+        let new_class = if current.is_empty() {
+            class_name.to_string()
+        } else {
+            format!("{} {}", current, class_name)
+        };
+        self.attributes.insert("class".to_string(), new_class);
+        self
+    }
+
+    pub fn style(&mut self, style: &str) -> &mut Self {
+        self.attributes.insert("style".to_string(), style.to_string());
+        self
+    }
+
+    pub fn mask(&mut self, mask_id: &str) -> &mut Self {
+        self.attributes.insert("mask".to_string(), format!("url(#{})", mask_id));
+        self
+    }
+
+    pub fn clip_path(&mut self, clip_id: &str) -> &mut Self {
+        self.attributes.insert("clip-path".to_string(), format!("url(#{})", clip_id));
+        self
+    }
+
+    pub fn id(&mut self, id: &str) -> &mut Self {
+        self.attributes.insert("id".to_string(), id.to_string());
         self
     }
     pub fn fill(&mut self, color: &str) -> &mut Self {
@@ -373,5 +471,48 @@ mod tests {
         let output = svg.to_string();
         assert!(output.contains("animate"));
         assert!(output.contains("attributeName=\"r\""));
+    }
+
+    #[test]
+    fn test_css_classes() {
+        let mut svg = Svg::new(100, 100);
+        svg.rect(50, 50)
+            .class("primary")
+            .add_class("highlight")
+            .move_to(10, 10);
+        
+        let output = svg.to_string();
+        assert!(output.contains("class=\"primary highlight\""));
+    }
+
+    #[test]
+    fn test_mask_and_clip() {
+        let mut svg = Svg::new(200, 200);
+        let defs = svg.defs();
+        defs.add_child("mask", {
+            let mut attrs = std::collections::HashMap::new();
+            attrs.insert("id".to_string(), "testMask".to_string());
+            attrs
+        });
+        
+        svg.rect(100, 100)
+            .mask("testMask")
+            .clip_path("testClip");
+        
+        let output = svg.to_string();
+        assert!(output.contains("mask=\"url(#testMask)\""));
+        assert!(output.contains("clip-path=\"url(#testClip)\""));
+    }
+
+    #[test]
+    fn test_polyline_polygon() {
+        let mut svg = Svg::new(200, 200);
+        svg.polyline("10,10 50,50 100,10").stroke("#red");
+        svg.polygon("10,100 50,150 100,100").fill("#blue");
+        
+        let output = svg.to_string();
+        assert!(output.contains("polyline"));
+        assert!(output.contains("polygon"));
+        assert!(output.contains("points="));
     }
 }
