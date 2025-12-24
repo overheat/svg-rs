@@ -24,6 +24,7 @@ exclude = [
 default = []
 draggable = []
 shapes = []
+math = []
 
 [[bin]]
 name = "svg-rs"
