@@ -1,12 +1,22 @@
 [package]
 name = "svg-rs"
 version = "0.1.0"
-edition = "2024"
-description = "The lightweight library for manipulating and animating SVG in rust"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "A lightweight Rust library for creating and manipulating SVG graphics, inspired by svg.js"
 license = "MIT"
 repository = "https://github.com/your-username/svg-rs"
-keywords = ["svg", "graphics", "animation"]
-categories = ["graphics", "multimedia"]
+homepage = "https://github.com/your-username/svg-rs"
+documentation = "https://docs.rs/svg-rs"
+readme = "README.md"
+keywords = ["svg", "graphics", "animation", "vector", "xml"]
+categories = ["graphics", "multimedia", "web-programming"]
+exclude = [
+    "examples/*",
+    "*.svg",
+    ".git*",
+    "target/*"
+]
 
 [dependencies]
 
@@ -17,3 +27,5 @@ path = "src/main.rs"
 [lib]
 name = "svg_rs"
 path = "src/lib.rs"
+
+[dev-dependencies]

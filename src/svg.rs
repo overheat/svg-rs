@@ -1,5 +1,15 @@
 use std::collections::HashMap;
 
+/// The main SVG canvas that holds all elements and provides methods to create new ones.
+///
+/// # Examples
+///
+/// ```rust
+/// use svg_rs::*;
+///
+/// let mut canvas = Svg::new(800, 600);
+/// canvas.rect(100, 100).fill("#red").move_to(50, 50);
+/// ```
 pub struct Svg {
     width: u32,
     height: u32,
@@ -7,12 +17,16 @@ pub struct Svg {
     elements: Vec<Element>,
 }
 
+/// An SVG element that can be styled, positioned, and transformed.
+///
+/// Elements support method chaining for fluent API usage.
 pub struct Element {
     tag: String,
     attributes: HashMap<String, String>,
     children: Vec<Element>,
 }
 
+/// A group container for organizing related elements (currently unused).
 pub struct Group<'a> {
     element: &'a mut Element,
     svg: &'a mut Svg,

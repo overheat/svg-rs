@@ -10,13 +10,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     gradient.stop("100%", "#fad0c4");
     canvas.rect(640, 360).fill("url(#sunset)");
 
-    // 分组 + 变换
+    // Group + transform
     let group = canvas.group().transform("translate(80, 60)");
     group.rect(200, 120).fill("#ffffff").stroke("#222222").stroke_width(2);
     group.circle(30).fill("#2d9cdb").center(60, 60);
     group.circle(30).fill("#27ae60").center(140, 60);
 
-    // 路径示例
+    // Path example
     canvas
         .path("M 360 220 Q 400 160 440 220 T 520 220")
         .fill("none")

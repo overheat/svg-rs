@@ -1,6 +1,6 @@
 // shapes.rs
-// 基础几何示例：rect、circle、polygon、polyline。
-// 运行：`cargo run --example shapes`
+// Basic geometry examples: rect, circle, polygon, polyline.
+// Run: `cargo run --example shapes`
 
 use svg_rs::*;
 

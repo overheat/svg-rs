@@ -1,2 +1,21 @@
-/target
+/# Rust
+/target/
+Cargo.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated files
+*.svg
+!examples/*.svg
+
+# Logs
+*.log
 **/*.svg
