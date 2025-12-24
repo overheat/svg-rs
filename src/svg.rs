@@ -9,6 +9,12 @@ pub struct Svg {
 pub struct Element {
     tag: String,
     attributes: HashMap<String, String>,
+    children: Vec<Element>,
+}
+
+pub struct Group<'a> {
+    element: &'a mut Element,
+    svg: &'a mut Svg,
 }
 
 impl Svg {
@@ -67,10 +73,31 @@ impl Svg {
         self.add_element("text", attrs)
     }
 
+    pub fn group(&mut self) -> &mut Element {
+        self.add_element("g", HashMap::new())
+    }
+
+    pub fn polyline(&mut self, points: &str) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("points".to_string(), points.to_string());
+        self.add_element("polyline", attrs)
+    }
+
+    pub fn polygon(&mut self, points: &str) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("points".to_string(), points.to_string());
+        self.add_element("polygon", attrs)
+    }
+
+    pub fn defs(&mut self) -> &mut Element {
+        self.add_element("defs", HashMap::new())
+    }
+
     fn add_element(&mut self, tag: &str, attributes: HashMap<String, String>) -> &mut Element {
         let element = Element {
             tag: tag.to_string(),
             attributes,
+            children: Vec::new(),
         };
         
         self.elements.push(element);
@@ -100,6 +127,80 @@ impl Svg {
 }
 
 impl Element {
+    pub fn add_child(&mut self, tag: &str, attributes: HashMap<String, String>) -> &mut Element {
+        let element = Element {
+            tag: tag.to_string(),
+            attributes,
+            children: Vec::new(),
+        };
+        self.children.push(element);
+        self.children.last_mut().unwrap()
+    }
+
+    pub fn rect(&mut self, width: u32, height: u32) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("width".to_string(), width.to_string());
+        attrs.insert("height".to_string(), height.to_string());
+        self.add_child("rect", attrs)
+    }
+
+    pub fn circle(&mut self, radius: u32) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("r".to_string(), radius.to_string());
+        self.add_child("circle", attrs)
+    }
+
+    pub fn linear_gradient(&mut self, id: &str) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("id".to_string(), id.to_string());
+        self.add_child("linearGradient", attrs)
+    }
+
+    pub fn stop(&mut self, offset: &str, color: &str) -> &mut Element {
+        let mut attrs = HashMap::new();
+        attrs.insert("offset".to_string(), offset.to_string());
+        attrs.insert("stop-color".to_string(), color.to_string());
+        self.add_child("stop", attrs)
+    }
+
+    pub fn animate(&mut self, duration: u32) -> &mut Self {
+        let mut attrs = HashMap::new();
+        attrs.insert("dur".to_string(), format!("{}s", duration));
+        let animate_elem = Element {
+            tag: "animate".to_string(),
+            attributes: attrs,
+            children: Vec::new(),
+        };
+        self.children.push(animate_elem);
+        self
+    }
+
+    pub fn animate_attr(&mut self, attr: &str, from: &str, to: &str, duration: u32) -> &mut Self {
+        let mut attrs = HashMap::new();
+        attrs.insert("attributeName".to_string(), attr.to_string());
+        attrs.insert("from".to_string(), from.to_string());
+        attrs.insert("to".to_string(), to.to_string());
+        attrs.insert("dur".to_string(), format!("{}s", duration));
+        attrs.insert("repeatCount".to_string(), "indefinite".to_string());
+        
+        let animate_elem = Element {
+            tag: "animate".to_string(),
+            attributes: attrs,
+            children: Vec::new(),
+        };
+        self.children.push(animate_elem);
+        self
+    }
+
+    pub fn on_click(&mut self, handler: &str) -> &mut Self {
+        self.attributes.insert("onclick".to_string(), handler.to_string());
+        self
+    }
+
+    pub fn on_hover(&mut self, handler: &str) -> &mut Self {
+        self.attributes.insert("onmouseover".to_string(), handler.to_string());
+        self
+    }
     pub fn fill(&mut self, color: &str) -> &mut Self {
         self.attributes.insert("fill".to_string(), color.to_string());
         self
@@ -120,13 +221,13 @@ impl Element {
         self
     }
 
-    pub fn move_to(&mut self, x: u32, y: u32) -> &mut Self {
+    pub fn move_to(&mut self, x: i32, y: i32) -> &mut Self {
         self.attributes.insert("x".to_string(), x.to_string());
         self.attributes.insert("y".to_string(), y.to_string());
         self
     }
 
-    pub fn center(&mut self, x: u32, y: u32) -> &mut Self {
+    pub fn center(&mut self, x: i32, y: i32) -> &mut Self {
         self.attributes.insert("cx".to_string(), x.to_string());
         self.attributes.insert("cy".to_string(), y.to_string());
         self
@@ -170,8 +271,12 @@ impl Element {
             }
         }
         
-        if self.tag == "text" && !text_content.is_empty() {
-            format!("<{}{}>{}</{}>", self.tag, attrs, text_content, self.tag)
+        if !self.children.is_empty() || (self.tag == "text" && !text_content.is_empty()) {
+            let mut content = text_content;
+            for child in &self.children {
+                content.push_str(&child.to_string());
+            }
+            format!("<{}{}>{}</{}>", self.tag, attrs, content, self.tag)
         } else {
             format!("<{}{}/>", self.tag, attrs)
         }
@@ -231,5 +336,42 @@ mod tests {
         
         let output = svg.to_string();
         assert!(output.contains("transform=\"rotate(45)\""));
+    }
+
+    #[test]
+    fn test_group() {
+        let mut svg = Svg::new(200, 200);
+        let group = svg.group();
+        group.rect(50, 50).fill("#red").move_to(0, 0);
+        
+        let output = svg.to_string();
+        assert!(output.contains("<g>"));
+        assert!(output.contains("</g>"));
+        assert!(output.contains("rect"));
+    }
+
+    #[test]
+    fn test_gradient() {
+        let mut svg = Svg::new(200, 200);
+        let defs = svg.defs();
+        let gradient = defs.linear_gradient("test");
+        gradient.stop("0%", "#ff0000");
+        
+        let output = svg.to_string();
+        assert!(output.contains("defs"));
+        assert!(output.contains("linearGradient"));
+        assert!(output.contains("stop"));
+    }
+
+    #[test]
+    fn test_animation() {
+        let mut svg = Svg::new(100, 100);
+        svg.circle(25)
+            .center(50, 50)
+            .animate_attr("r", "25", "50", 2);
+        
+        let output = svg.to_string();
+        assert!(output.contains("animate"));
+        assert!(output.contains("attributeName=\"r\""));
     }
 }
