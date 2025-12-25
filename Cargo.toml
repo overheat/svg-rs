@@ -1,6 +1,6 @@
 [package]
 name = "svg-rs"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 authors = ["Aaron Tsui"]
 description = "A lightweight Rust library for creating and manipulating SVG graphics, inspired by svg.js"
